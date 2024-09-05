@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:todo_app/resources/getx_localization/languages.dart';
 import 'package:todo_app/resources/routes/routes.dart';
-import 'package:todo_app/screen/login_screen.dart';
+import 'package:todo_app/resources/routes/routes_name.dart';
+import 'package:todo_app/storage/app_prefs.dart';
 import 'package:todo_app/utils/di.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
-  initAppModule();
+ await initAppModule();
 
-  runApp(const MyApp());
+  String initialRoute = await getInitialRoute();
+
+  runApp( MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+
+  const MyApp({super.key, required this.initialRoute});
 
 
   @override
@@ -30,8 +34,20 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
+      initialRoute: initialRoute,
       getPages: AppRoutes.appRoutes(),
     );
+  }
+}
+
+
+Future<String> getInitialRoute() async {
+  final userToken = instance<AppPreferences>().getuserToken();
+
+  if (userToken.isNotEmpty) {
+    return RouteName.noteScreen; // Navigate to Dashboard if user is already signed in
+  } else {
+    return RouteName.loginView; // Navigate to Login if no user token is found
   }
 }
 

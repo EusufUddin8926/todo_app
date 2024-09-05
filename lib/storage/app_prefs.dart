@@ -30,7 +30,7 @@ Future<void> setUserTokenData(String value) async {
     await _sharedPreferences.setString(USER_TOKEN, value);
   }
 
-  String getuserInfoAlldata() {
+  String getuserToken() {
     String? token = _sharedPreferences.getString(USER_TOKEN);
     return token ?? "";
   }

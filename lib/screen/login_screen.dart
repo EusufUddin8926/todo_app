@@ -1,12 +1,15 @@
+import 'dart:convert';
+import 'dart:math';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:todo_app/resources/colors/app_color.dart';
 import '../controller/login_controller.dart';
 import '../helpers/constant.dart';
 import '../resources/assets/asset_icon.dart';
 import '../resources/font/app_fonts.dart';
+import '../resources/routes/routes_name.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,10 +41,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: Constants.dp_110,
               ),
             ),
+            SizedBox(height: Constants.dp_60,),
             Container(
               width: MediaQuery.sizeOf(context).width,
               height: 58,
-              margin: EdgeInsets.only(left: 16, right: 16, top: 32),
+              margin: const EdgeInsets.only(left: 16, right: 16, top: 32),
               child: TextField(
                 controller: loginVM.emailController.value,
                 decoration: InputDecoration(
@@ -68,7 +72,8 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 58,
               margin: EdgeInsets.only(left: 16, right: 16, top: 12),
               child: TextField(
-                controller: loginVM.emailController.value,
+                keyboardType: TextInputType.visiblePassword,
+                controller: loginVM.passwordController.value,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -90,11 +95,24 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: Constants.dp_24),
             ElevatedButton(
-              onPressed: (){
+              onPressed: () async{
+                bool isSignedIn = await loginVM.getSignIn(
+                  loginVM.emailController.value.text,
+                  loginVM.passwordController.value.text,
+                );
+
+                if (isSignedIn) {
+                  Future.delayed(Duration.zero, () {
+                    Get.offNamed(RouteName.noteScreen);
+                  });
+                } else {
+
+                  Get.snackbar('Error', 'Sign-in failed, please try again');
+                }
 
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColor.primaryColor,
+                backgroundColor: AppColor.yellow,
                 disabledBackgroundColor: AppColor.primaryColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(Constants.dp_8),
@@ -118,4 +136,6 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+
 }

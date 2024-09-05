@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:todo_app/controller/note_controller.dart';
+import 'package:todo_app/resources/routes/routes_name.dart';
 import '../helpers/constant.dart';
 import '../resources/assets/asset_icon.dart';
 import '../resources/colors/app_color.dart';
@@ -13,6 +17,10 @@ class NoteScreen extends StatefulWidget {
 }
 
 class _NoteScreenState extends State<NoteScreen> {
+
+  final noteController = Get.put(NoteController()) ;
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,26 +31,24 @@ class _NoteScreenState extends State<NoteScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              child: SvgPicture.asset(
-                ImageAssets.note_icon,
-                width: Constants.dp_160,
-                height: Constants.dp_160,
-              ),
+            SvgPicture.asset(
+              ImageAssets.note_icon,
+              width: Constants.dp_160,
+              height: Constants.dp_160,
             ),
-            SizedBox(height: Constants.dp_30,),
+            const SizedBox(height: Constants.dp_30,),
 
-            Text(
+            const Text(
               "Add your first note",
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColor.black,
                 fontSize: Constants.dp_20,
                 fontWeight: FontWeight.bold,
               ),
             ),
 
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
               "Relax and write something \nbeautiful",
               textAlign: TextAlign.center,
@@ -52,10 +58,10 @@ class _NoteScreenState extends State<NoteScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: Constants.dp_60),
+            const SizedBox(height: Constants.dp_60),
             ElevatedButton(
               onPressed: () {
-
+                Get.toNamed(RouteName.addNoteScreen);
               },
               style: ElevatedButton.styleFrom(
                 elevation: 4,

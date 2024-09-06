@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:todo_app/models/note_data_model.dart';
 import 'package:todo_app/storage/app_database_manager.dart';
 import 'package:todo_app/utils/di.dart';
@@ -25,7 +27,12 @@ class AddNoteController extends GetxController {
   RxString selectedTime = ''.obs;
   final imageBytes = Rxn<Uint8List>();
   static final appDatabaseManager = AppDatabaseManager();
+  // Getter for image
+  File? get image => _image.value;
 
+  void setImage(File file) {
+    _image.value = file;
+  }
 
 
 
@@ -40,10 +47,17 @@ class AddNoteController extends GetxController {
   }
 
 
+  Future<bool> updateNoteOnIsarDataBase(Id noteId, NoteDataModel note) async{
+    final success = await appDatabaseManager.updateNoteById(noteId,note);
+    if (success) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
 
 
-  // Getter for image
-  File? get image => _image.value;
 
   Future<void> pickImageFromGallery() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);

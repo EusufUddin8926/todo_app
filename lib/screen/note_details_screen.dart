@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:todo_app/models/db_models/note_database.dart';
+import 'package:todo_app/resources/routes/routes_name.dart';
 
 import '../resources/colors/app_color.dart';
 
@@ -30,7 +31,7 @@ class _NoteDetailsScreenState extends State<NoteDetailsScreen> {
 
               GestureDetector(
                 onTap: (){
-
+                  Get.toNamed(RouteName.addNoteScreen, arguments: noteData);
                 },
                 child: Container(
                   width: MediaQuery.sizeOf(context).width,

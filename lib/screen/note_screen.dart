@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:todo_app/controller/note_controller.dart';
 import 'package:todo_app/resources/components/single_note.dart';
 import 'package:todo_app/resources/routes/routes_name.dart';
+
 import '../helpers/constant.dart';
 import '../resources/assets/asset_icon.dart';
 import '../resources/colors/app_color.dart';
@@ -29,7 +30,7 @@ class _NoteScreenState extends State<NoteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: (){
+      floatingActionButton: FloatingActionButton(onPressed: () {
         Get.toNamed(RouteName.addNoteScreen);
       }),
       body: Obx(() {
@@ -45,9 +46,21 @@ class _NoteScreenState extends State<NoteScreen> {
             itemCount: notes.length,
             itemBuilder: (context, index) {
               final note = notes[index];
-              return SingleNote(noteData: note, onTap: (){
-
-              });
+              return SingleNote(
+                noteData: note,
+                onTap: () {
+                  Get.toNamed(RouteName.noteDetails, arguments: note);
+                },
+                onDelete: () async {
+                  print('Attempting to delete note with ID: ${note.id}');
+                  final isDeleted = await noteController.deleteNote(note.id);
+                  if (isDeleted) {
+                    print("Success");
+                  } else {
+                    print("Delete with Problem");
+                  }
+                },
+              );
             },
           );
         }
@@ -91,11 +104,11 @@ class _NoteScreenState extends State<NoteScreen> {
           const SizedBox(height: Constants.dp_60),
           ElevatedButton(
             onPressed: () {
-              Get.toNamed(RouteName.addNoteScreen)?.then((value) => {
-                if(value == "back"){
-                  noteController.fetchAllNotes()
-                }
-              },);
+              Get.toNamed(RouteName.addNoteScreen)?.then(
+                (value) => {
+                  if (value == "back") {noteController.fetchAllNotes()}
+                },
+              );
             },
             style: ElevatedButton.styleFrom(
               elevation: 4,

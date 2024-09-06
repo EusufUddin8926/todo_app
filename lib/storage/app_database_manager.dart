@@ -61,4 +61,28 @@ class AppDatabaseManager{
       return []; // Return an empty list on error
     }
   }
+
+  Future<bool> deleteNoteById(Id noteId) async {
+    try {
+      final isar = Isar.getInstance();
+      if (isar != null) {
+        return await isar.writeTxn(() async {
+          final result = await isar.noteDatas.delete(noteId);
+          return result; // Return the result of the delete operation (true/false)
+        });
+      } else {
+        if (kDebugMode) {
+          print('Isar instance is null.');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting note: $e');
+      }
+      return false;
+    }
+  }
+
+
 }

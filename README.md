@@ -4,12 +4,15 @@ An elegant task-taking app written in Flutter that uses Isar DB for local storag
 
 ## Features
 
-1. **Login Modality**: Users log in with email and password. Once logged in, they remain logged in until they manually log out.
-2. **Minimalistic Design**: Focus on a clean, minimalistic UI.
-3. **CRUD Operations**: Users can add, edit, delete, and mark tasks as completed.
-4. **Notifications**: Users can schedule reminders with scheduled times.
-5. **Dark Mode**: Supports both light and dark themes.
-6. **Edit Note**: Users can edit previously saved notes.
+1. **Login Modality**: Users can log in with email and password. Once logged in, there's no need to log in again until they log out.
+2. **Minimalistic Design**: A clean and simple UI for a seamless user experience.
+3. **CRUD Operations**: Users can add, edit, delete tasks, and mark them as completed.
+4. **Notifications**: Schedule reminders for tasks with the `flutter_local_notifications` package.
+5. **Dark Mode**: Light and dark theme variants for the app.
+6. **Edit Notes**: Edit previously saved notes.
+7. **Local Storage**: Stores data locally using Isar DB for offline access.
+8. **Image Integration**: Users can add images to their notes using the `image_picker` package.
+9. **Custom Themes**: Implemented with `get` package for state management and `get_storage` for persisting user preferences.
 
 ## Dependencies
 

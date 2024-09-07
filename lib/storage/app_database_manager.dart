@@ -61,6 +61,24 @@ class AppDatabaseManager{
     }
   }
 
+  Future<NoteData> fetchNoteById(int id) async {
+    try {
+      final isar = Isar.getInstance();
+      if (isar != null) {
+        final note = await isar.noteDatas.get(id); // Assume 'id' is the primary key
+        if (note != null) {
+          return note;
+        } else {
+          throw Exception('Note not found');
+        }
+      } else {
+        throw Exception('Isar instance is null');
+      }
+    } catch (e) {
+      throw Exception('Error retrieving note: $e');
+    }
+  }
+
   Future<bool> deleteNoteById(Id noteId) async {
     try {
       final isar = Isar.getInstance();

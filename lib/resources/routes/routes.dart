@@ -30,13 +30,6 @@ class AppRoutes {
       transition: Transition.leftToRightWithFade ,
     ),
 
-    GetPage(
-      name: RouteName.noteDetails,
-      page: () => const NoteDetailsScreen(),
-      transitionDuration: const Duration(milliseconds: 500),
-      transition: Transition.leftToRightWithFade ,
-    ),
-
   ];
 
 }

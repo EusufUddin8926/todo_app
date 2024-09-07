@@ -1,7 +1,10 @@
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../controller/note_controller.dart';
 import '../models/db_models/note_database.dart';
 import '../storage/app_prefs.dart';
 
@@ -22,6 +25,8 @@ Future<void> initAppModule() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   instance.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
   instance.registerLazySingleton<AppPreferences>(() => AppPreferences(instance<SharedPreferences>()));
+
+  Get.lazyPut(()=>NoteController());
 
 
 }

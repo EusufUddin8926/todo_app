@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:todo_app/controller/add_note_controller.dart';
+import 'package:todo_app/controller/note_controller.dart';
 import 'package:todo_app/helpers/constant.dart';
 import 'package:todo_app/resources/assets/asset_icon.dart';
 import '../models/db_models/note_database.dart';
 import '../resources/colors/app_color.dart';
-import '../resources/components/button.dart';
 import '../resources/components/input_field.dart';
 import '../resources/routes/routes_name.dart';
 import '../utils/Utils.dart';
@@ -24,17 +23,17 @@ class AddNoteScreen extends StatefulWidget {
 }
 
 class _AddNoteScreenState extends State<AddNoteScreen> {
-  final addNoteController = Get.put(AddNoteController());
+  final noteController = Get.put(NoteController());
   var noteData;
   int _selectedColor = 0;
-  String _selectedRepeat = 'None';
+  String _selectedRepeat = 'Remainder Status';
   List<String> repeatList = [
-    'None',
+    'Remainder Status',
     'Daily',
     'Weekly',
     'Monthly',
   ];
-  DateTime _selectedDate = DateTime.now();
+  final DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -45,21 +44,29 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     }
 
     if (noteData != null) {
-      addNoteController.titleController.value.text = noteData.title;
-      addNoteController.descriptionController.value.text = noteData.description;
-      addNoteController.scheduleTime.value = DateTime.parse(noteData.remainderDateTime);
+      noteController.titleController.value.text = noteData.title;
+      noteController.descriptionController.value.text = noteData.description;
+      noteController.scheduleTime.value =
+          DateTime.parse(noteData.remainderDateTime);
       _selectedRepeat = noteData.repeat;
       _selectedColor = noteData.color;
 
       if (noteData.imageBytes != null) {
-        addNoteController.imageBytes.value = base64Decode(noteData.imageBytes);
+        noteController.imageBytes.value = base64Decode(noteData.imageBytes);
         // Convert Base64 string to File
         convertUint8ListToFile(
                 base64Decode(noteData.imageBytes), 'note_image.jpg')
             .then((file) {
-          addNoteController.setImage(file);
+          noteController.setImage(file);
         });
       }
+    } else {
+      noteController.titleController.value.text = "";
+      noteController.descriptionController.value.text = "";
+      noteController.scheduleTime.value = DateTime.now();
+      _selectedRepeat = "Remainder Status";
+      _selectedColor = 0;
+      noteController.setImage(null);
     }
   }
 
@@ -67,9 +74,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
+      backgroundColor: context.theme.scaffoldBackgroundColor,
       appBar: _appBar(),
       body: Container(
-        color: AppColor.white,
         width: MediaQuery.sizeOf(context).width,
         height: MediaQuery.sizeOf(context).height,
         child: SingleChildScrollView(
@@ -83,54 +90,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: AppColor.gray.withOpacity(0.3),
+                  color: AppColor.yellow.withOpacity(0.1),
                 ),
-                margin: const EdgeInsets.only(left: 16, right: 16, top: Constants.dp_16),
+                margin: const EdgeInsets.only(
+                    left: 16, right: 16, top: Constants.dp_16),
                 constraints: const BoxConstraints(
                   minHeight: 54, // Set your minimum height here
                 ),
                 child: TextField(
-                  controller: addNoteController.titleController.value,
-                  maxLines: null, // Makes the TextField's height dynamic
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
-                    fillColor: Colors.transparent,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    hintText: "Add Title",
-                    hintStyle: const TextStyle(
-                      color: Colors.black45,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: Constants.dp_16,
-              ),
-              Container(
-                width: MediaQuery.sizeOf(context).width,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: AppColor.gray.withOpacity(0.3),
-                ),
-                margin: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                ),
-                constraints: const BoxConstraints(
-                  minHeight: 120, // Set your minimum height here
-                ),
-                child: TextField(
-                  autofocus: true,
-                  controller: addNoteController.descriptionController.value,
+                  autofocus: false,
+                  controller: noteController.titleController.value,
                   maxLines: null,
                   // Makes the TextField's height dynamic
                   keyboardType: TextInputType.multiline,
@@ -145,15 +114,54 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       borderSide: BorderSide.none,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    hintText: "Add Title",
+                    hintText: "task Title",
                     hintStyle: const TextStyle(
-                      color: Colors.black45,
                       fontSize: 14,
                     ),
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
+                height: Constants.dp_16,
+              ),
+              Container(
+                width: MediaQuery.sizeOf(context).width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: AppColor.yellow.withOpacity(0.1),
+                ),
+                margin: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                ),
+                constraints: const BoxConstraints(
+                  minHeight: 120, // Set your minimum height here
+                ),
+                child: TextField(
+                  autofocus: false,
+                  controller: noteController.descriptionController.value,
+                  maxLines: null,
+                  // Makes the TextField's height dynamic
+                  keyboardType: TextInputType.multiline,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
+                    fillColor: Colors.transparent,
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    hintText: "task description",
+                    hintStyle: const TextStyle(
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
                 height: Constants.dp_16,
               ),
               Container(
@@ -166,7 +174,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
-                  color: AppColor.gray.withOpacity(0.3),
+                  color: AppColor.yellow.withOpacity(0.1),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 12.0),
@@ -175,13 +183,13 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                     children: [
                       Obx(
                         () => Text(
-                          addNoteController.scheduleTime.value.toString(),
-                          style: const TextStyle(color: AppColor.gray),
+                          DateFormat('MM/dd/yyyy HH:mm a')
+                              .format(noteController.scheduleTime.value),
                         ),
                       ),
                       InkWell(
                         onTap: () async {
-                          await addNoteController.selectDatePickerDate(context);
+                          await noteController.selectDatePickerDate(context);
                         },
                         child: const Icon(
                           Icons.calendar_month,
@@ -193,7 +201,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: Constants.dp_16,
               ),
               Padding(
@@ -204,20 +212,23 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   widget: Row(
                     children: [
                       DropdownButton<String>(
-                        //value: _selectedRemind.toString(),
-                          icon: Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.grey,
+                          icon: const Padding(
+                            padding: EdgeInsets.only(top: 4.0),
+                            child: Icon(
+                              Icons.keyboard_arrow_down,
+                              color: Colors.grey,
+                            ),
                           ),
                           iconSize: 32,
                           elevation: 4,
                           style: subTitleTextStle,
                           underline: Container(height: 0),
                           onChanged: (String? newValue) {
-                            if (newValue != null)
+                            if (newValue != null) {
                               setState(() {
                                 _selectedRepeat = newValue;
                               });
+                            }
                           },
                           items: repeatList
                               .map<DropdownMenuItem<String>>((String value) {
@@ -226,30 +237,30 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                               child: Text(value),
                             );
                           }).toList()),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 6),
                     ],
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: Constants.dp_16,
               ),
               InkWell(
                 onTap: () {
-                  addNoteController.pickImageFromGallery();
+                  noteController.pickImageFromGallery();
                 },
                 child: Container(
                   width: MediaQuery.sizeOf(context).width,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: AppColor.gray.withOpacity(0.3),
+                    color: AppColor.yellow.withOpacity(0.1),
                   ),
                   margin: const EdgeInsets.only(left: 16, right: 16),
                   constraints: const BoxConstraints(
                     minHeight: 180, // Set your minimum height here
                   ),
                   child: Obx(() {
-                    if (addNoteController.image == null) {
+                    if (noteController.image == null) {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -264,7 +275,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Image.file(
-                          addNoteController.image!,
+                          noteController.image!,
                           fit: BoxFit.cover,
                           width: MediaQuery.sizeOf(context).width,
                           height:
@@ -278,47 +289,79 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               SizedBox(
                 height: Constants.dp_40,
               ),
-
-              noteData == null  ?
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0, right: 16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _colorChips(),
-                    MyButton(
-                      label: "Create Task",
-                      onTap: () {
-                        _addTaskToDB(context);
-                      },
+              noteData == null
+                  ? Padding(
+                      padding: const EdgeInsets.only(
+                          left: 20.0, right: 20, top: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _colorChips(),
+                          InkWell(
+                            onTap: (){
+                              _addTaskToDB(context);
+                            },
+                            child: Container(
+                              height: 50,
+                              width: 130,
+                              margin: const EdgeInsets.only(top: 8.0),
+                              decoration: BoxDecoration(
+                                color: primaryClr,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  "Create Task",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(
+                          left: 16.0, right: 16, top: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _colorChips(),
+                          InkWell(
+                            onTap: (){
+                              if(noteData.isCompleted){
+                                Utils.warningToastMessage("Task is already completed and cannot be updated!");
+                                return;
+                              }
+                              _updateTaskToDB(context);
+                            },
+                            child: Container(
+                              height: 50,
+                              width: 130,
+                              margin: const EdgeInsets.only(top: 8.0),
+                              decoration: BoxDecoration(
+                                color: noteData.isCompleted ? AppColor.gray.withOpacity(0.3) : primaryClr,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  "Update Task",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ) : Padding(
-                padding: const EdgeInsets.only(left: 16.0, right: 16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _colorChips(),
-                    MyButton(
-                      label: "Update Task",
-                      onTap: () {
-                        _updateTaskToDB(context);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
             ],
           ),
         ),
       ),
     );
   }
-
 
   _appBar() {
     return AppBar(
@@ -333,7 +376,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         actions: [
           CircleAvatar(
             radius: 16,
-            backgroundImage: AssetImage(ImageAssets.girl_icon),
+            backgroundImage: AssetImage(ImageAssets.logout_icon),
           ),
           SizedBox(
             width: 20,
@@ -341,17 +384,36 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         ]);
   }
 
-
   _updateTaskToDB(BuildContext context) async {
-    final Uint8List imageBytes =
-    addNoteController.imageBytes.value!;
+
+    if (noteController.titleController.value.text.isEmpty) {
+      Utils.warningToastMessage("Note Title can not be empty!");
+      return;
+    }
+
+    if (noteController.descriptionController.value.text.isEmpty) {
+      Utils.warningToastMessage("Note description can not be empty!");
+      return;
+    }
+
+    if (_selectedRepeat == "Remainder Status") {
+      Utils.warningToastMessage("Select Remainder Status first!");
+      return;
+    }
+
+    if(noteController.image == null){
+      Utils.warningToastMessage("Task image can not be empty!");
+      return;
+    }
+
+
+    final Uint8List imageBytes = noteController.imageBytes.value!;
     final String encodedImage = base64Encode(imageBytes);
 
     final note = NoteData(
-      title: addNoteController.titleController.value.text,
-      description: addNoteController
-          .descriptionController.value.text,
-      remainderDateTime: addNoteController.scheduleTime.value.toString(),
+      title: noteController.titleController.value.text,
+      description: noteController.descriptionController.value.text,
+      remainderDateTime: noteController.scheduleTime.value.toString(),
       isCompleted: noteData.isCompleted,
       color: _selectedColor,
       repeat: _selectedRepeat,
@@ -361,7 +423,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     );
 
     var isUpdated =
-    await addNoteController.updateNoteOnDataBase(noteData.id ,note);
+        await noteController.updateNoteOnDataBase(noteData.id, note);
 
     if (isUpdated) {
       Utils.successToastMessage("Success");
@@ -369,20 +431,36 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     } else {
       Utils.errorToastMessage("Error");
     }
-
-
   }
 
   _addTaskToDB(BuildContext context) async {
-    final Uint8List imageBytes =
-    addNoteController.imageBytes.value!;
+    if (noteController.titleController.value.text.isEmpty) {
+      Utils.warningToastMessage("Note Title can not be empty!");
+      return;
+    }
+
+    if (noteController.descriptionController.value.text.isEmpty) {
+      Utils.warningToastMessage("Note description can not be empty!");
+      return;
+    }
+
+    if (_selectedRepeat == "Remainder Status") {
+      Utils.warningToastMessage("Select Remainder Status first!");
+      return;
+    }
+
+    if(noteController.image == null){
+      Utils.warningToastMessage("Task image can not be empty!");
+      return;
+    }
+
+    final Uint8List imageBytes = noteController.imageBytes.value!;
     final String encodedImage = base64Encode(imageBytes);
 
     final note = NoteData(
-      title: addNoteController.titleController.value.text,
-      description: addNoteController
-          .descriptionController.value.text,
-      remainderDateTime: addNoteController.scheduleTime.value.toString(),
+      title: noteController.titleController.value.text,
+      description: noteController.descriptionController.value.text,
+      remainderDateTime: noteController.scheduleTime.value.toString(),
       isCompleted: false,
       color: _selectedColor,
       repeat: _selectedRepeat,
@@ -391,8 +469,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
       imageBytes: encodedImage ?? "",
     );
 
-    var isInserted =
-    await addNoteController.addNoteOnIsarDataBase(note);
+    var isInserted = await noteController.addNoteOnIsarDataBase(note);
 
     if (isInserted) {
       Utils.successToastMessage("Success");
@@ -400,8 +477,6 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     } else {
       Utils.errorToastMessage("Error");
     }
-
-
   }
 
   Future<File> convertUint8ListToFile(Uint8List data, String fileName) async {
@@ -410,8 +485,6 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     file.writeAsBytesSync(data);
     return file;
   }
-
-
 
   _colorChips() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -425,7 +498,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
       Wrap(
         children: List<Widget>.generate(
           3,
-              (int index) {
+          (int index) {
             return GestureDetector(
               onTap: () {
                 setState(() {
@@ -439,16 +512,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   backgroundColor: index == 0
                       ? primaryClr
                       : index == 1
-                      ? pinkClr
-                      : yellowClr,
+                          ? pinkClr
+                          : yellowClr,
                   child: index == _selectedColor
                       ? Center(
-                    child: Icon(
-                      Icons.done,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  )
+                          child: Icon(
+                            Icons.done,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        )
                       : Container(),
                 ),
               ),
@@ -459,7 +532,3 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     ]);
   }
 }
-
-
-
-

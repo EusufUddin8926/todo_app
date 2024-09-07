@@ -1,4 +1,5 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,6 +13,7 @@ import '../helpers/theme_services.dart';
 import '../resources/assets/asset_icon.dart';
 import '../resources/components/button.dart';
 import '../resources/components/task_tile.dart';
+import '../services/notifi_service.dart';
 import '../utils/Utils.dart';
 import '../utils/size_config.dart';
 import '../utils/theme.dart';
@@ -39,12 +41,13 @@ class _NoteScreenState extends State<NoteScreen> {
     SizeConfig().init(context);
 
     return Scaffold(
+        backgroundColor: context.theme.scaffoldBackgroundColor,
         appBar: _appBar(),
         body: Column(
           children: [
             _addTaskBar(),
             _dateBar(),
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             _showTasks(),
@@ -57,7 +60,7 @@ class _NoteScreenState extends State<NoteScreen> {
       child: Obx(() {
         if (noteController.notes.isEmpty) {
           return _noTaskMsg();
-        } else
+        } else {
           return ListView.builder(
               scrollDirection: Axis.vertical,
               itemCount: noteController.notes.length,
@@ -73,17 +76,27 @@ class _NoteScreenState extends State<NoteScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            /*GestureDetector(
-                                onTap: () {
-                                 // showBottomSheet(context, task);
-                                },
-                                child: ),*/
                             TaskTile(
                               task: task,
                               onRemainderSet: () async {
+
+                                if(task.isRemiander){
+                                  Utils.warningToastMessage("Reminder has already been set.");
+                                  return;
+                                }
+
                                 bool isRemainderUpdate = await noteController
                                     .updateNoteRemainderOnDataBase(
                                         task.id, task);
+
+                                if(isRemainderUpdate){
+                                  if (isRemainderUpdate) {
+                                    Utils.successToastMessage(
+                                        "Successfully remainder set");
+                                  } else {
+                                    Utils.errorToastMessage("Error");
+                                  }
+                                }
                               },
                               onDetailsTap: () {
                                 Get.toNamed(RouteName.addNoteScreen,
@@ -146,6 +159,7 @@ class _NoteScreenState extends State<NoteScreen> {
                   return Container();
                 }
               });
+        }
       }),
     );
   }
@@ -169,7 +183,7 @@ class _NoteScreenState extends State<NoteScreen> {
             style: subTitleTextStle,
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 80,
         ),
       ],
@@ -186,20 +200,20 @@ class _NoteScreenState extends State<NoteScreen> {
         selectionColor: context.theme.scaffoldBackgroundColor,
         selectedTextColor: primaryClr,
         dateTextStyle: GoogleFonts.lato(
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 20.0,
             fontWeight: FontWeight.w600,
             color: Colors.grey,
           ),
         ),
         dayTextStyle: GoogleFonts.lato(
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 10.0,
             color: Colors.grey,
           ),
         ),
         monthTextStyle: GoogleFonts.lato(
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 10.0,
             color: Colors.grey,
           ),
@@ -222,7 +236,7 @@ class _NoteScreenState extends State<NoteScreen> {
   _addTaskBar() {
     return Container(
       margin: EdgeInsets.only(bottom: 12, top: 12.0),
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -259,14 +273,8 @@ class _NoteScreenState extends State<NoteScreen> {
         elevation: 0,
         backgroundColor: context.theme.scaffoldBackgroundColor,
         leading: GestureDetector(
-          onTap: () {
+          onTap: () async{
             ThemeService().switchTheme();
-            /*_taskController.notifyHelper.displayNotification(
-              title: "Theme Changed",
-              body: Get.isDarkMode
-                  ? "Light theme activated."
-                  : "Dark theme activated",
-            );*/
 
             //  _taskController.notifyHelper.scheduledNotification();
             // notifyHelper.periodicalyNotification();
@@ -275,11 +283,24 @@ class _NoteScreenState extends State<NoteScreen> {
               color: Get.isDarkMode ? Colors.white : darkGreyClr),
         ),
         actions: [
-          CircleAvatar(
-            radius: 16,
-            backgroundImage: AssetImage(ImageAssets.girl_icon),
+          InkWell(
+            onTap: () async{
+            var isLogOut = await  noteController.logoutUser();
+            if(isLogOut){
+              Get.offNamed(RouteName.loginView);
+            }else{
+              if (kDebugMode) {
+                print("Logout Issue");
+              }
+            }
+
+            },
+            child: const CircleAvatar(
+              radius: 16,
+              backgroundImage: AssetImage(ImageAssets.logout_icon),
+            ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 20,
           ),
         ]);
@@ -288,9 +309,9 @@ class _NoteScreenState extends State<NoteScreen> {
   showBottomSheet(BuildContext context, NoteData task) {
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.only(top: 4),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(16),  // Set topLeft radius to 12dp
             topRight: Radius.circular(16), // Set topRight radius to 12dp
           ),
@@ -340,7 +361,7 @@ class _NoteScreenState extends State<NoteScreen> {
 
               },
               clr: Colors.red[300]!),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           _buildBottomSheetButton(
@@ -349,7 +370,7 @@ class _NoteScreenState extends State<NoteScreen> {
                 Get.back();
               },
               isClose: true),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
         ]),
@@ -362,9 +383,7 @@ class _NoteScreenState extends State<NoteScreen> {
         required Function onTap,
         Color? clr,
         bool? isClose}) {
-    if (isClose == null) {
-      isClose = false;
-    }
+    isClose ??= false;
     return GestureDetector(
       onTap: onTap as void Function()?,
       child: Container(

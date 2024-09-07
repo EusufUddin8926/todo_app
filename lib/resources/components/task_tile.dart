@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app/models/db_models/note_database.dart';
 
 import '../../utils/size_config.dart';
@@ -27,20 +28,19 @@ class _TaskTileState extends State<TaskTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-          EdgeInsets.symmetric(horizontal: getProportionateScreenWidth(20)),
+      padding: EdgeInsets.symmetric(horizontal: getProportionateScreenWidth(20)),
       width: SizeConfig.screenWidth,
       margin: EdgeInsets.only(bottom: getProportionateScreenHeight(12)),
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: _getBGClr(widget.task.color),
-        ),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
+      child: Stack(
+        children: [
+          Container(
+            padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: _getBGClr(widget.task.color),
+            ),
+            child: Container(
+              margin: const EdgeInsets.only(top: 24),
               child: InkWell(
                 onTap: () {
                   widget.onDetailsTap();
@@ -53,14 +53,16 @@ class _TaskTileState extends State<TaskTile> {
                         children: [
                           Text(
                             widget.task.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.lato(
-                              textStyle: TextStyle(
+                              textStyle: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 6,
                           ),
                           Row(
@@ -73,7 +75,9 @@ class _TaskTileState extends State<TaskTile> {
                               ),
                               SizedBox(width: 4),
                               Text(
-                                "${widget.task.remainderDateTime}",
+                                DateFormat('MM/dd/yyyy hh:mm a').format(
+                                    DateTime.parse(
+                                        widget.task.remainderDateTime)),
                                 style: GoogleFonts.lato(
                                   textStyle: TextStyle(
                                       fontSize: 13, color: Colors.grey[100]),
@@ -84,9 +88,12 @@ class _TaskTileState extends State<TaskTile> {
                           SizedBox(height: 6),
                           Text(
                             widget.task.description,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                             style: GoogleFonts.lato(
                               textStyle: TextStyle(
                                   fontSize: 12, color: Colors.grey[100]),
+
                             ),
                           ),
                         ],
@@ -103,7 +110,7 @@ class _TaskTileState extends State<TaskTile> {
                       child: Text(
                         widget.task.isCompleted ? "COMPLETED" : "TODO",
                         style: GoogleFonts.lato(
-                          textStyle: TextStyle(
+                          textStyle: const TextStyle(
                               fontSize: 8,
                               fontWeight: FontWeight.bold,
                               color: Colors.white),
@@ -114,47 +121,46 @@ class _TaskTileState extends State<TaskTile> {
                 ),
               ),
             ),
-            // Positioned Notification Icon at the top right
-            Positioned(
-                right: -4,
-                top: -4,
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _iconColor = Colors
-                              .green; // Change icon color to green on click
-                        });
-                        widget.onRemainderSet();
-                      },
-                      child: Icon(
-                        Icons.notifications,
-                        color: _iconColor,
-                        size: 20,
-                      ),
+          ),
+          Positioned(
+              right: 8,
+              top: 8,
+              child: Row(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _iconColor =
+                            Colors.green; // Change icon color to green on click
+                      });
+                      widget.onRemainderSet();
+                    },
+                    child: Icon(
+                      Icons.add_alarm_sharp,
+                      color: _iconColor,
+                      size: 20,
                     ),
-                    SizedBox(
-                      width: 10,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _iconColor =
+                            Colors.green; // Change icon color to green on click
+                      });
+                      widget.onSettingsTap();
+                    },
+                    child: const Icon(
+                      Icons.more_vert,
+                      color: Colors.white,
+                      size: 20,
                     ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _iconColor = Colors
-                              .green; // Change icon color to green on click
-                        });
-                        widget.onSettingsTap();
-                      },
-                      child: Icon(
-                        Icons.settings,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ],
-                )),
-          ],
-        ),
+                  ),
+                ],
+              )),
+        ],
       ),
     );
   }

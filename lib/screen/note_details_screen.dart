@@ -19,6 +19,8 @@ class _NoteDetailsScreenState extends State<NoteDetailsScreen> {
 
   var noteData = Get.arguments as NoteData;
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

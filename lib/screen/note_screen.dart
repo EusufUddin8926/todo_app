@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/controller/note_controller.dart';
 import 'package:todo_app/models/db_models/note_database.dart';
+import 'package:todo_app/resources/colors/app_color.dart';
 import 'package:todo_app/resources/routes/routes_name.dart';
 import '../helpers/theme_services.dart';
 import '../resources/assets/asset_icon.dart';
@@ -43,15 +44,54 @@ class _NoteScreenState extends State<NoteScreen> {
     return Scaffold(
         backgroundColor: context.theme.scaffoldBackgroundColor,
         appBar: _appBar(),
-        body: Column(
+        body: Stack(
           children: [
-            _addTaskBar(),
-            _dateBar(),
-            const SizedBox(
-              height: 12,
+            Column(
+              children: [
+                _addTaskBar(),
+                _dateBar(),
+                const SizedBox(
+                  height: 12,
+                ),
+                _showTasks(),
+              ],
             ),
-            _showTasks(),
-          ],
+            Positioned(
+              bottom: 16,
+              right: 16,
+            child: InkWell(
+              onTap: () async{
+                await Get.toNamed(RouteName.addNoteScreen)?.then((value) {
+                  if (value != null) {
+                    noteController.fetchAllNotes();
+                  }
+                });
+              },
+              child: Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: primaryClr,
+                  borderRadius: BorderRadius.circular(50),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryClr.withOpacity(0.3), // Shadow color with opacity
+                      spreadRadius: 1, // Spread radius of the shadow
+                      blurRadius: 6, // Blur radius of the shadow
+                      offset: Offset(0, 4), // Offset of the shadow (only vertical to mimic bottom shadow)
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.add,
+                    color: AppColor.white,
+                    size: 30,
+                  ),
+                ),
+              ),
+            ),)
+          ]
         ));
   }
 
@@ -253,7 +293,7 @@ class _NoteScreenState extends State<NoteScreen> {
               ),
             ],
           ),
-          MyButton(
+          /*MyButton(
             label: "+ Add Task",
             onTap: () async {
               await Get.toNamed(RouteName.addNoteScreen)?.then((value) {
@@ -262,7 +302,7 @@ class _NoteScreenState extends State<NoteScreen> {
                 }
               });
             },
-          ),
+          ),*/
         ],
       ),
     );

@@ -6,7 +6,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../controller/note_controller.dart';
 import '../models/db_models/note_database.dart';
+import '../services/notifi_service.dart';
 import '../storage/app_prefs.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 final instance = GetIt.instance;
 
@@ -27,6 +29,13 @@ Future<void> initAppModule() async {
   instance.registerLazySingleton<AppPreferences>(() => AppPreferences(instance<SharedPreferences>()));
 
   Get.lazyPut(()=>NoteController());
+
+  // Initialize time zones
+  tz.initializeTimeZones();
+
+  // Initialize notifications
+  final notificationService = NotificationService();
+  await notificationService.initNotification();
 
 
 }

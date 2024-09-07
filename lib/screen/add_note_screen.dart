@@ -90,7 +90,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: AppColor.yellow.withOpacity(0.1),
+                  color: primaryClr.withOpacity(0.1),
                 ),
                 margin: const EdgeInsets.only(
                     left: 16, right: 16, top: Constants.dp_16),
@@ -115,8 +115,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     hintText: "task Title",
-                    hintStyle: const TextStyle(
+                    hintStyle:  TextStyle(
                       fontSize: 14,
+                      color: Colors.grey.withOpacity(0.7)
                     ),
                   ),
                 ),
@@ -128,7 +129,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: AppColor.yellow.withOpacity(0.1),
+                  color: primaryClr.withOpacity(0.1),
                 ),
                 margin: const EdgeInsets.only(
                   left: 16,
@@ -155,8 +156,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     hintText: "task description",
-                    hintStyle: const TextStyle(
+                    hintStyle:  TextStyle(
                       fontSize: 14,
+                       color:  Colors.grey.withOpacity(0.7)
                     ),
                   ),
                 ),
@@ -174,7 +176,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
-                  color: AppColor.yellow.withOpacity(0.1),
+                  color: primaryClr.withOpacity(0.1),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 12.0),
@@ -182,18 +184,20 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Obx(
-                        () => Text(
-                          DateFormat('MM/dd/yyyy HH:mm a')
-                              .format(noteController.scheduleTime.value),
+                        () => Text(DateFormat('MM/dd/yyyy HH:mm a').format(noteController.scheduleTime.value),
+                          style:  TextStyle(
+                            fontSize: 14,
+                            color:  noteController.isDateSelected.value ? Colors.black : Colors.grey.withOpacity(0.7),
+                          ),
                         ),
                       ),
                       InkWell(
                         onTap: () async {
                           await noteController.selectDatePickerDate(context);
                         },
-                        child: const Icon(
+                        child:  Icon(
                           Icons.calendar_month,
-                          color: AppColor.gray,
+                          color:  Colors.grey.withOpacity(0.7),
                           size: 30,
                         ),
                       ),
@@ -212,11 +216,11 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   widget: Row(
                     children: [
                       DropdownButton<String>(
-                          icon: const Padding(
+                          icon:  Padding(
                             padding: EdgeInsets.only(top: 4.0),
                             child: Icon(
                               Icons.keyboard_arrow_down,
-                              color: Colors.grey,
+                              color:  Colors.grey.withOpacity(0.7),
                             ),
                           ),
                           iconSize: 32,
@@ -253,7 +257,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   width: MediaQuery.sizeOf(context).width,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: AppColor.yellow.withOpacity(0.1),
+                    color: primaryClr.withOpacity(0.1),
                   ),
                   margin: const EdgeInsets.only(left: 16, right: 16),
                   constraints: const BoxConstraints(
@@ -266,7 +270,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                         children: [
                           Icon(
                             Icons.camera_alt_outlined,
-                            color: AppColor.gray,
+                            color:  Colors.grey.withOpacity(0.7),
                             size: 80,
                           ),
                         ],
@@ -286,7 +290,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   }),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: Constants.dp_40,
               ),
               noteData == null

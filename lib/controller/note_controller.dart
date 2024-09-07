@@ -86,7 +86,10 @@ class NoteController extends GetxController {
     datatTimePicker.DatePicker.showDateTimePicker(
       context,
       showTitleActions: true,
-      onChanged: (date) => scheduleTime.value = date,
+      onChanged: (date){
+        scheduleTime.value = date;
+        isDateSelected.value = true;
+      },
       onConfirm: (date) {},
     );
   }

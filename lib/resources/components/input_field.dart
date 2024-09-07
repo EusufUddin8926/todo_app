@@ -25,7 +25,7 @@ class InputField extends StatelessWidget {
           height: 52,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: AppColor.yellow.withOpacity(0.1),
+            color: primaryClr.withOpacity(0.1),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,8 +49,9 @@ class InputField extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     hintText: hint,
-                    hintStyle: const TextStyle(
+                    hintStyle:  TextStyle(
                       fontSize: 14,
+                      color:  Colors.grey.withOpacity(0.7),
                     ),
                   ),
                 ),

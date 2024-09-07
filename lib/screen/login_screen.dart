@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/resources/colors/app_color.dart';
-import 'package:todo_app/utils/Utils.dart';
+import 'package:todo_app/helpers/utils.dart';
 import '../controller/login_controller.dart';
 import '../helpers/constant.dart';
 import '../resources/assets/asset_icon.dart';
 import '../resources/font/app_fonts.dart';
 import '../resources/routes/routes_name.dart';
-import '../utils/theme.dart';
+import '../helpers/theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,19 +23,24 @@ class _LoginScreenState extends State<LoginScreen> {
   final loginVM = Get.put(LoginViewModel()) ;
 
 
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: context.theme.scaffoldBackgroundColor,
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Container(
-          color: AppColor.white,
-          width: MediaQuery.sizeOf(context).width,
-          height: MediaQuery.sizeOf(context).height,
-          child:_loginBody(),
+    return WillPopScope(
+      onWillPop:  () async {
+        SystemNavigator.pop();
+        return false;
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: context.theme.scaffoldBackgroundColor,
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Container(
+            color: AppColor.white,
+            width: MediaQuery.sizeOf(context).width,
+            height: MediaQuery.sizeOf(context).height,
+            child:_loginBody(),
+          ),
         ),
       ),
     );
@@ -46,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          child: SvgPicture.asset(
+          child: Image.asset(
             ImageAssets.app_icon,
             width: Constants.dp_110,
             height: Constants.dp_110,
@@ -109,6 +115,10 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () async{
             String emailPattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$';
             RegExp emailRegExp = RegExp(emailPattern);
+
+            if (FocusScope.of(context).isFirstFocus) {
+              FocusScope.of(context).unfocus();
+            }
 
             if (loginVM.emailController.value.text.isEmpty) {
               Utils.warningToastMessage("Email cannot be empty!");

@@ -1,6 +1,7 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -10,14 +11,14 @@ import 'package:todo_app/controller/note_controller.dart';
 import 'package:todo_app/models/db_models/note_database.dart';
 import 'package:todo_app/resources/colors/app_color.dart';
 import 'package:todo_app/resources/routes/routes_name.dart';
-import '../helpers/theme_services.dart';
+import '../services/theme_services.dart';
 import '../resources/assets/asset_icon.dart';
 import '../resources/components/button.dart';
 import '../resources/components/task_tile.dart';
-import '../services/notifi_service.dart';
-import '../utils/Utils.dart';
-import '../utils/size_config.dart';
-import '../utils/theme.dart';
+import '../services/notification_service.dart';
+import '../helpers/utils.dart';
+import '../helpers/size_config.dart';
+import '../helpers/theme.dart';
 
 class NoteScreen extends StatefulWidget {
   const NoteScreen({super.key});
@@ -41,58 +42,64 @@ class _NoteScreenState extends State<NoteScreen> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
 
-    return Scaffold(
-        backgroundColor: context.theme.scaffoldBackgroundColor,
-        appBar: _appBar(),
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                _addTaskBar(),
-                _dateBar(),
-                const SizedBox(
-                  height: 12,
-                ),
-                _showTasks(),
-              ],
-            ),
-            Positioned(
-              bottom: 16,
-              right: 16,
-            child: InkWell(
-              onTap: () async{
-                await Get.toNamed(RouteName.addNoteScreen)?.then((value) {
-                  if (value != null) {
-                    noteController.fetchAllNotes();
-                  }
-                });
-              },
-              child: Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: primaryClr,
-                  borderRadius: BorderRadius.circular(50),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryClr.withOpacity(0.3), // Shadow color with opacity
-                      spreadRadius: 1, // Spread radius of the shadow
-                      blurRadius: 6, // Blur radius of the shadow
-                      offset: Offset(0, 4), // Offset of the shadow (only vertical to mimic bottom shadow)
+    return WillPopScope(
+      onWillPop:  () async {
+        SystemNavigator.pop();
+        return false;
+      },
+      child: Scaffold(
+          backgroundColor: context.theme.scaffoldBackgroundColor,
+          appBar: _appBar(),
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  _addTaskBar(),
+                  _dateBar(),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  _showTasks(),
+                ],
+              ),
+              Positioned(
+                bottom: 16,
+                right: 16,
+              child: InkWell(
+                onTap: () async{
+                  await Get.toNamed(RouteName.insertUpdateNoteScreen)?.then((value) {
+                    if (value != null) {
+                      noteController.fetchAllNotes();
+                    }
+                  });
+                },
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: primaryClr,
+                    borderRadius: BorderRadius.circular(50),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryClr.withOpacity(0.3), // Shadow color with opacity
+                        spreadRadius: 1, // Spread radius of the shadow
+                        blurRadius: 6, // Blur radius of the shadow
+                        offset: Offset(0, 4), // Offset of the shadow (only vertical to mimic bottom shadow)
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.add,
+                      color: AppColor.white,
+                      size: 30,
                     ),
-                  ],
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.add,
-                    color: AppColor.white,
-                    size: 30,
                   ),
                 ),
-              ),
-            ),)
-          ]
-        ));
+              ),)
+            ]
+          )),
+    );
   }
 
   _showTasks() {
@@ -139,7 +146,7 @@ class _NoteScreenState extends State<NoteScreen> {
                                 }
                               },
                               onDetailsTap: () {
-                                Get.toNamed(RouteName.addNoteScreen,
+                                Get.toNamed(RouteName.insertUpdateNoteScreen,
                                     arguments: task);
                               },
                               onSettingsTap: () {
@@ -183,7 +190,7 @@ class _NoteScreenState extends State<NoteScreen> {
                                 }
                               },
                               onDetailsTap: () {
-                                Get.toNamed(RouteName.addNoteScreen,
+                                Get.toNamed(RouteName.insertUpdateNoteScreen,
                                     arguments: task);
                               },
                               onSettingsTap: () {

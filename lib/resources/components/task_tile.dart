@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/models/db_models/note_database.dart';
 
-import '../../utils/size_config.dart';
-import '../../utils/theme.dart';
+import '../../helpers/size_config.dart';
+import '../../helpers/theme.dart';
 
 class TaskTile extends StatefulWidget {
   final NoteData task;

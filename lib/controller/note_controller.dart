@@ -8,10 +8,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:isar/isar.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as datatTimePicker;
 import '../models/db_models/note_database.dart';
-import '../services/notifi_service.dart';
+import '../services/notification_service.dart';
 import '../storage/app_database_manager.dart';
 import '../storage/app_prefs.dart';
-import '../utils/di.dart';
+import '../helpers/di.dart';
 
 class NoteController extends GetxController {
 

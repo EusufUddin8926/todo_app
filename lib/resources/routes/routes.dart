@@ -1,8 +1,7 @@
 import 'package:get/get.dart';
 import 'package:todo_app/resources/routes/routes_name.dart';
-import 'package:todo_app/screen/add_note_screen.dart';
+import 'package:todo_app/screen/insert_update_note_screen.dart';
 import 'package:todo_app/screen/login_screen.dart';
-import 'package:todo_app/screen/note_details_screen.dart';
 import 'package:todo_app/screen/note_screen.dart';
 
 class AppRoutes {
@@ -24,8 +23,8 @@ class AppRoutes {
     ),
 
     GetPage(
-      name: RouteName.addNoteScreen,
-      page: () => const AddNoteScreen(),
+      name: RouteName.insertUpdateNoteScreen,
+      page: () => const InsertUpdateNoteScreen(),
       transitionDuration: const Duration(milliseconds: 500),
       transition: Transition.leftToRightWithFade ,
     ),

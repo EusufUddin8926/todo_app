@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todo_app/helpers/theme_services.dart';
-import 'package:todo_app/resources/getx_localization/languages.dart';
+import 'package:todo_app/services/theme_services.dart';
+import 'package:todo_app/resources/localization/languages.dart';
 import 'package:todo_app/resources/routes/routes.dart';
 import 'package:todo_app/resources/routes/routes_name.dart';
 import 'package:todo_app/storage/app_prefs.dart';
-import 'package:todo_app/utils/di.dart';
-import 'package:todo_app/utils/theme.dart';
+import 'package:todo_app/helpers/di.dart';
+import 'package:todo_app/helpers/theme.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

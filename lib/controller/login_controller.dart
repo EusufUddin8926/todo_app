@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 import '../storage/app_prefs.dart';
-import '../utils/di.dart';
+import '../helpers/di.dart';
 
 class LoginViewModel extends GetxController {
 

@@ -47,7 +47,7 @@ class NotificationService {
 
                 var noteId = int.parse(payload);
                 var noteData = await noteController.fetchNoteById(noteId as Id);
-                Get.toNamed(RouteName.addNoteScreen, arguments: noteData);
+                Get.toNamed(RouteName.insertUpdateNoteScreen, arguments: noteData);
               }
             });
   }

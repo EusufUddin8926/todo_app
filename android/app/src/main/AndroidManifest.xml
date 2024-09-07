@@ -13,7 +13,7 @@
 
 
     <application
-        android:label="todo_app"
+        android:label="TODO App"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

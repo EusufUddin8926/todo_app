@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../controller/note_controller.dart';
 import '../models/db_models/note_database.dart';
-import '../services/notifi_service.dart';
+import '../services/notification_service.dart';
 import '../storage/app_prefs.dart';
 import 'package:timezone/data/latest.dart' as tz;
 

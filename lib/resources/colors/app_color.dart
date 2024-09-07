@@ -1,6 +1,8 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class AppColor {
 
   static const Color blackColor = Color(0xff000000);
@@ -201,6 +203,15 @@ class AppColor {
   static const Color userNameTextColor = Color(0xff717171);
 
   static const Color parentLayout = Color(0xff6750A4);
+
+
+ static const Color purpleClr = Color(0xFFA0338A);
+  static const Color yellowClr = Color(0xFFFFB746);
+  static const Color pinkClr = Color(0xFFF54B80);
+
+  static const primaryClr = purpleClr;
+  static const Color darkGreyClr = Color(0xFF121212);
+  static Color darkHeaderClr = Colors.grey[800]!;
 
 
 

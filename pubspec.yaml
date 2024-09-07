@@ -30,6 +30,12 @@ dependencies:
   flutter_svg: ^2.0.10+1
   dart_jsonwebtoken: ^2.14.0
   image_picker: ^0.8.7+4
+  flutter_datetime_picker_plus: ^2.1.0
+  get_storage:
+  timezone: ^0.9.1
+  date_picker_timeline: ^1.2.3
+  flutter_staggered_animations:
+  flutter_local_notifications:
 
 dev_dependencies:
   flutter_test:

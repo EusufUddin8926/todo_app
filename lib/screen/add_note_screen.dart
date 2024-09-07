@@ -1,19 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:todo_app/controller/add_note_controller.dart';
 import 'package:todo_app/helpers/constant.dart';
-import 'package:todo_app/models/note_data_model.dart';
-import 'package:todo_app/resources/routes/routes_name.dart';
-import 'package:todo_app/utils/Utils.dart';
-
+import 'package:todo_app/resources/assets/asset_icon.dart';
 import '../models/db_models/note_database.dart';
 import '../resources/colors/app_color.dart';
-import '../resources/font/app_fonts.dart';
+import '../resources/components/button.dart';
+import '../resources/components/input_field.dart';
+import '../resources/routes/routes_name.dart';
+import '../utils/Utils.dart';
+import '../utils/theme.dart';
 
 class AddNoteScreen extends StatefulWidget {
   const AddNoteScreen({super.key});
@@ -25,6 +26,15 @@ class AddNoteScreen extends StatefulWidget {
 class _AddNoteScreenState extends State<AddNoteScreen> {
   final addNoteController = Get.put(AddNoteController());
   var noteData;
+  int _selectedColor = 0;
+  String _selectedRepeat = 'None';
+  List<String> repeatList = [
+    'None',
+    'Daily',
+    'Weekly',
+    'Monthly',
+  ];
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -37,8 +47,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     if (noteData != null) {
       addNoteController.titleController.value.text = noteData.title;
       addNoteController.descriptionController.value.text = noteData.description;
-      addNoteController.selectedDate.value = noteData.remainderDate;
-      addNoteController.selectedTime.value = noteData.remainderTime;
+      addNoteController.scheduleTime.value = DateTime.parse(noteData.remainderDateTime);
+      _selectedRepeat = noteData.repeat;
+      _selectedColor = noteData.color;
 
       if (noteData.imageBytes != null) {
         addNoteController.imageBytes.value = base64Decode(noteData.imageBytes);
@@ -56,6 +67,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
+      appBar: _appBar(),
       body: Container(
         color: AppColor.white,
         width: MediaQuery.sizeOf(context).width,
@@ -65,7 +77,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               SizedBox(
-                height: Constants.dp_30,
+                height: Constants.dp_16,
               ),
               Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -73,7 +85,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   borderRadius: BorderRadius.circular(16),
                   color: AppColor.gray.withOpacity(0.3),
                 ),
-                margin: const EdgeInsets.only(left: 16, right: 16, top: 32),
+                margin: const EdgeInsets.only(left: 16, right: 16, top: Constants.dp_16),
                 constraints: const BoxConstraints(
                   minHeight: 54, // Set your minimum height here
                 ),
@@ -114,7 +126,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   right: 16,
                 ),
                 constraints: const BoxConstraints(
-                  minHeight: 220, // Set your minimum height here
+                  minHeight: 120, // Set your minimum height here
                 ),
                 child: TextField(
                   autofocus: true,
@@ -163,9 +175,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                     children: [
                       Obx(
                         () => Text(
-                          addNoteController.selectedDate.isEmpty
-                              ? "Select date"
-                              : addNoteController.selectedDate.value,
+                          addNoteController.scheduleTime.value.toString(),
                           style: const TextStyle(color: AppColor.gray),
                         ),
                       ),
@@ -186,41 +196,37 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               SizedBox(
                 height: Constants.dp_16,
               ),
-              Container(
-                height: 54,
-                width: MediaQuery.sizeOf(context).width,
-                margin: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                ),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  color: AppColor.gray.withOpacity(0.3),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                child: InputField(
+                  title: "Repeat",
+                  hint: _selectedRepeat,
+                  widget: Row(
                     children: [
-                      Obx(
-                        () => Text(
-                          addNoteController.selectedTime.isEmpty
-                              ? "Select Time"
-                              : addNoteController.selectedTime.value,
-                          style: const TextStyle(color: AppColor.gray),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () async {
-                          await addNoteController.selectRemainderTime(context);
-                        },
-                        child: const Icon(
-                          Icons.access_alarm,
-                          color: AppColor.gray,
-                          size: 30,
-                        ),
-                      ),
+                      DropdownButton<String>(
+                        //value: _selectedRemind.toString(),
+                          icon: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.grey,
+                          ),
+                          iconSize: 32,
+                          elevation: 4,
+                          style: subTitleTextStle,
+                          underline: Container(height: 0),
+                          onChanged: (String? newValue) {
+                            if (newValue != null)
+                              setState(() {
+                                _selectedRepeat = newValue;
+                              });
+                          },
+                          items: repeatList
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList()),
+                      SizedBox(width: 6),
                     ],
                   ),
                 ),
@@ -272,102 +278,130 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               SizedBox(
                 height: Constants.dp_40,
               ),
-              noteData != null
-                  ? ElevatedButton(
-                      onPressed: () async {
-                        final Uint8List imageBytes = addNoteController.imageBytes.value!;
-                        final String encodedImage = base64Encode(imageBytes);
 
-                        final note = NoteDataModel(
-                          title: addNoteController.titleController.value.text,
-                          description: addNoteController
-                              .descriptionController.value.text,
-                          remainderDate: addNoteController.selectedDate.value,
-                          remainderTime: addNoteController.selectedTime.value,
-                          imageUri: encodedImage ?? "",
-                        );
-
-                        var isUpdated = await addNoteController.updateNoteOnIsarDataBase(noteData.id,note);
-
-                        if (isUpdated) {
-                          Utils.successToastMessage("Success");
-                          Get.offNamed(RouteName.noteScreen, arguments: 'back');
-                        } else {
-                          Utils.errorToastMessage("Error");
-                        }
+              noteData == null  ?
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, right: 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _colorChips(),
+                    MyButton(
+                      label: "Create Task",
+                      onTap: () {
+                        _addTaskToDB(context);
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColor.yellow,
-                        disabledBackgroundColor: AppColor.primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Constants.dp_8),
-                        ),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.only(
-                            left: 32, right: 32, bottom: 8, top: 8),
-                        child: Text(
-                          "Update Note",
-                          style: TextStyle(
-                            fontFamily: AppFonts.schylerRegular,
-                            color: Colors.white,
-                            fontSize: Constants.dp_20,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    )
-                  : ElevatedButton(
-                      onPressed: () async {
-                        final Uint8List imageBytes =
-                            addNoteController.imageBytes.value!;
-                        final String encodedImage = base64Encode(imageBytes);
-
-                        final note = NoteDataModel(
-                          title: addNoteController.titleController.value.text,
-                          description: addNoteController
-                              .descriptionController.value.text,
-                          remainderDate: addNoteController.selectedDate.value,
-                          remainderTime: addNoteController.selectedTime.value,
-                          imageUri: encodedImage ?? "",
-                        );
-
-                        var isInserted =
-                            await addNoteController.addNoteOnIsarDataBase(note);
-
-                        if (isInserted) {
-                          Utils.successToastMessage("Success");
-                          Get.offNamed(RouteName.noteScreen, arguments: 'back');
-                        } else {
-                          Utils.errorToastMessage("Error");
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColor.yellow,
-                        disabledBackgroundColor: AppColor.primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Constants.dp_8),
-                        ),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.only(
-                            left: 32, right: 32, bottom: 8, top: 8),
-                        child: Text(
-                          "Add Note",
-                          style: TextStyle(
-                            fontFamily: AppFonts.schylerRegular,
-                            color: Colors.white,
-                            fontSize: Constants.dp_20,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
                     ),
+                  ],
+                ),
+              ) : Padding(
+                padding: const EdgeInsets.only(left: 16.0, right: 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _colorChips(),
+                    MyButton(
+                      label: "Update Task",
+                      onTap: () {
+                        _updateTaskToDB(context);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
             ],
           ),
         ),
       ),
     );
+  }
+
+
+  _appBar() {
+    return AppBar(
+        elevation: 0,
+        backgroundColor: context.theme.scaffoldBackgroundColor,
+        leading: GestureDetector(
+          onTap: () {
+            Get.back();
+          },
+          child: Icon(Icons.arrow_back_ios, size: 24, color: primaryClr),
+        ),
+        actions: [
+          CircleAvatar(
+            radius: 16,
+            backgroundImage: AssetImage(ImageAssets.girl_icon),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+        ]);
+  }
+
+
+  _updateTaskToDB(BuildContext context) async {
+    final Uint8List imageBytes =
+    addNoteController.imageBytes.value!;
+    final String encodedImage = base64Encode(imageBytes);
+
+    final note = NoteData(
+      title: addNoteController.titleController.value.text,
+      description: addNoteController
+          .descriptionController.value.text,
+      remainderDateTime: addNoteController.scheduleTime.value.toString(),
+      isCompleted: noteData.isCompleted,
+      color: _selectedColor,
+      repeat: _selectedRepeat,
+      date: DateFormat.yMd().format(_selectedDate),
+      isRemiander: noteData.isRemiander,
+      imageBytes: encodedImage ?? "",
+    );
+
+    var isUpdated =
+    await addNoteController.updateNoteOnDataBase(noteData.id ,note);
+
+    if (isUpdated) {
+      Utils.successToastMessage("Success");
+      Get.offNamed(RouteName.noteScreen, arguments: 'back');
+    } else {
+      Utils.errorToastMessage("Error");
+    }
+
+
+  }
+
+  _addTaskToDB(BuildContext context) async {
+    final Uint8List imageBytes =
+    addNoteController.imageBytes.value!;
+    final String encodedImage = base64Encode(imageBytes);
+
+    final note = NoteData(
+      title: addNoteController.titleController.value.text,
+      description: addNoteController
+          .descriptionController.value.text,
+      remainderDateTime: addNoteController.scheduleTime.value.toString(),
+      isCompleted: false,
+      color: _selectedColor,
+      repeat: _selectedRepeat,
+      date: DateFormat.yMd().format(_selectedDate),
+      isRemiander: false,
+      imageBytes: encodedImage ?? "",
+    );
+
+    var isInserted =
+    await addNoteController.addNoteOnIsarDataBase(note);
+
+    if (isInserted) {
+      Utils.successToastMessage("Success");
+      Get.offNamed(RouteName.noteScreen, arguments: 'back');
+    } else {
+      Utils.errorToastMessage("Error");
+    }
+
+
   }
 
   Future<File> convertUint8ListToFile(Uint8List data, String fileName) async {
@@ -376,4 +410,56 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     file.writeAsBytesSync(data);
     return file;
   }
+
+
+
+  _colorChips() {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(
+        "Color",
+        style: titleTextStle,
+      ),
+      SizedBox(
+        height: 8,
+      ),
+      Wrap(
+        children: List<Widget>.generate(
+          3,
+              (int index) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedColor = index;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: CircleAvatar(
+                  radius: 14,
+                  backgroundColor: index == 0
+                      ? primaryClr
+                      : index == 1
+                      ? pinkClr
+                      : yellowClr,
+                  child: index == _selectedColor
+                      ? Center(
+                    child: Icon(
+                      Icons.done,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  )
+                      : Container(),
+                ),
+              ),
+            );
+          },
+        ).toList(),
+      ),
+    ]);
+  }
 }
+
+
+
+

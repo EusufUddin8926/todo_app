@@ -9,10 +9,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:todo_app/models/note_data_model.dart';
+import 'package:todo_app/models/db_models/note_database.dart';
 import 'package:todo_app/storage/app_database_manager.dart';
-import 'package:todo_app/utils/di.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as datatTimePicker;
 import '../resources/colors/app_color.dart';
+import '../services/notifi_service.dart';
 
 class AddNoteController extends GetxController {
 
@@ -22,9 +23,9 @@ class AddNoteController extends GetxController {
   final _image = Rxn<File>();
   late DateTime initialDate;
   RxBool isDateSelected = false.obs;
-  RxString selectedDate = ''.obs;
+  Rx<DateTime> scheduleTime = DateTime.now().obs;
   RxBool isTimeSelected = false.obs;
-  RxString selectedTime = ''.obs;
+ // RxString selectedTime = ''.obs;
   final imageBytes = Rxn<Uint8List>();
   static final appDatabaseManager = AppDatabaseManager();
   // Getter for image
@@ -36,7 +37,7 @@ class AddNoteController extends GetxController {
 
 
 
-  Future<bool> addNoteOnIsarDataBase(NoteDataModel note) async{
+  Future<bool> addNoteOnIsarDataBase(NoteData note) async{
     final success = await appDatabaseManager.insertNoteData(note);
     if (success) {
       return true;
@@ -47,7 +48,7 @@ class AddNoteController extends GetxController {
   }
 
 
-  Future<bool> updateNoteOnIsarDataBase(Id noteId, NoteDataModel note) async{
+  /*Future<bool> updateNoteOnIsarDataBase(Id noteId, NoteData note) async{
     final success = await appDatabaseManager.updateNoteById(noteId,note);
     if (success) {
       return true;
@@ -55,7 +56,7 @@ class AddNoteController extends GetxController {
       return false;
     }
 
-  }
+  }*/
 
 
 
@@ -70,8 +71,10 @@ class AddNoteController extends GetxController {
   }
 
 
+
+
   Future<void> selectDatePickerDate(BuildContext context) async {
-    initialDate = DateTime.now();
+   /* initialDate = DateTime.now();
 
     final DateTime? picked = await showDatePicker(
         barrierDismissible: false,
@@ -110,10 +113,16 @@ class AddNoteController extends GetxController {
       selectedDate.value = formattedDate;
     }else{
       isDateSelected.value = false;
-    }
+    }*/
+    datatTimePicker.DatePicker.showDateTimePicker(
+      context,
+      showTitleActions: true,
+      onChanged: (date) => scheduleTime.value = date,
+      onConfirm: (date) {},
+    );
   }
 
-  Future<void> selectRemainderTime(BuildContext context) async {
+ /* Future<void> selectRemainderTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       builder: (context, child) {
         return Localizations.override(
@@ -145,6 +154,24 @@ class AddNoteController extends GetxController {
     } else {
       isTimeSelected.value = false;
     }
+  }*/
+
+
+  Future<bool> updateNoteOnDataBase(Id noteId, NoteData task) async{
+    int validId = (task.id.toInt() & 0x7FFFFFFF);
+    await NotificationService().scheduleNotification(
+        id: validId,
+        title: task.title,
+        body: '${task.remainderDateTime}',
+        scheduledNotificationDateTime: DateTime.parse(task.remainderDateTime));
+
+    final success = await appDatabaseManager.updateNoteById(noteId, task);
+    if (success) {
+      return true;
+    } else {
+      return false;
+    }
+
   }
 
 

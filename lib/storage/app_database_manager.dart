@@ -1,15 +1,10 @@
-
-
-
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:todo_app/models/db_models/note_database.dart';
 
-import '../models/note_data_model.dart';
-
 class AppDatabaseManager{
 
-  Future<bool> insertNoteData(NoteDataModel note) async {
+  Future<bool> insertNoteData(NoteData note) async {
     try {
       final isar = Isar.getInstance();
 
@@ -18,9 +13,13 @@ class AppDatabaseManager{
           isar.noteDatas.putSync(NoteData(
             title: note.title,
             description: note.description,
-            remainderDate: note.remainderDate,
-            remainderTime: note.remainderTime,
-            imageBytes: note.imageUri
+            remainderDateTime: note.remainderDateTime,
+            isCompleted: note.isCompleted,
+            isRemiander: note.isRemiander,
+            color: note.color,
+            repeat: note.repeat,
+            date: note.date,
+            imageBytes: note.imageBytes
           ));
         });
         return true; // Indicates successful update
@@ -84,7 +83,92 @@ class AppDatabaseManager{
     }
   }
 
-  // Update Note by Id
+
+  Future<bool> updateNoteRemainderById(Id noteId, bool remainder) async {
+    try {
+      final isar = Isar.getInstance();
+
+      if (isar != null) {
+        return await isar.writeTxn(() async {
+          // Retrieve the existing note by Id
+          final note = await isar.noteDatas.get(noteId);
+
+          if (note != null) {
+            // Update the fields
+            note.isRemiander = remainder;
+
+            // Save the updated note back to the database
+            await isar.noteDatas.put(note);
+            return true; // Return true if the update was successful
+          } else {
+            if (kDebugMode) {
+              print('Note with Id $noteId not found.');
+            }
+            return false; // Return false if the note was not found
+          }
+        });
+      } else {
+        if (kDebugMode) {
+          print('Isar instance is null.');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating note: $e');
+      }
+      return false;
+    }
+  }
+
+
+  Future<bool> updateNoteById(Id noteId, NoteData task) async {
+    try {
+      final isar = Isar.getInstance();
+
+      if (isar != null) {
+        return await isar.writeTxn(() async {
+          // Retrieve the existing note by Id
+          final note = await isar.noteDatas.get(noteId);
+
+          if (note != null) {
+            // Update the fields
+            note.title = task.title;
+            note.description = task.description;
+            note.isCompleted = task.isCompleted;
+            note.remainderDateTime = task.remainderDateTime;
+            note.color = task.color;
+            note.repeat = task.repeat;
+            note.date = task.date;
+            note.isRemiander = task.isRemiander;
+            note.imageBytes = task.imageBytes;
+
+            // Save the updated note back to the database
+            await isar.noteDatas.put(note);
+            return true; // Return true if the update was successful
+          } else {
+            if (kDebugMode) {
+              print('Note with Id $noteId not found.');
+            }
+            return false; // Return false if the note was not found
+          }
+        });
+      } else {
+        if (kDebugMode) {
+          print('Isar instance is null.');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating note: $e');
+      }
+      return false;
+    }
+  }
+
+
+ /* // Update Note by Id
   Future<bool> updateNoteById(Id noteId, NoteDataModel updatedNote) async {
     try {
       final isar = Isar.getInstance();
@@ -124,7 +208,7 @@ class AppDatabaseManager{
       }
       return false;
     }
-  }
+  }*/
 
 
 }

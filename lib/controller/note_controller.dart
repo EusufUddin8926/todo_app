@@ -5,6 +5,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:isar/isar.dart';
 
 import '../models/db_models/note_database.dart';
+import '../services/notifi_service.dart';
 import '../storage/app_database_manager.dart';
 
 class NoteController extends GetxController {
@@ -51,6 +52,24 @@ class NoteController extends GetxController {
       return false;
     }
     return false;
+  }
+
+Future<bool> updateNoteRemainderOnDataBase(Id noteId, NoteData task) async{
+
+
+    await NotificationService().scheduleNotification(
+      id: task.id,
+      title: task.title,
+      body: '${task.remainderDateTime}',
+      scheduledNotificationDateTime: DateTime.parse(task.remainderDateTime));
+
+    final success = await _databaseManager.updateNoteRemainderById(noteId, true);
+    if (success) {
+      return true;
+    } else {
+      return false;
+    }
+
   }
 
 

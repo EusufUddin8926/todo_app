@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:todo_app/resources/getx_localization/languages.dart';
 import 'package:todo_app/resources/routes/routes.dart';
 import 'package:todo_app/resources/routes/routes_name.dart';
+import 'package:todo_app/services/notifi_service.dart';
 import 'package:todo_app/storage/app_prefs.dart';
 import 'package:todo_app/utils/di.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
  await initAppModule();
-
+  await GetStorage.init();
+  NotificationService().initNotification();
+  tz.initializeTimeZones();
   String initialRoute = await getInitialRoute();
 
   runApp( MyApp(initialRoute: initialRoute));
@@ -45,9 +50,9 @@ Future<String> getInitialRoute() async {
   final userToken = instance<AppPreferences>().getuserToken();
 
   if (userToken.isNotEmpty) {
-    return RouteName.noteScreen; // Navigate to Dashboard if user is already signed in
+    return RouteName.noteScreen;
   } else {
-    return RouteName.loginView; // Navigate to Login if no user token is found
+    return RouteName.loginView;
   }
 }
 

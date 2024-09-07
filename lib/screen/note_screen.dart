@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app/controller/note_controller.dart';
-import 'package:todo_app/resources/components/single_note.dart';
+import 'package:todo_app/models/db_models/note_database.dart';
 import 'package:todo_app/resources/routes/routes_name.dart';
-
-import '../helpers/constant.dart';
+import '../helpers/theme_services.dart';
 import '../resources/assets/asset_icon.dart';
-import '../resources/colors/app_color.dart';
-import '../resources/font/app_fonts.dart';
+import '../resources/components/button.dart';
+import '../resources/components/task_tile.dart';
+import '../services/notifi_service.dart';
+import '../utils/Utils.dart';
+import '../utils/size_config.dart';
+import '../utils/theme.dart';
+import 'package:date_picker_timeline/date_picker_timeline.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as datatTimePicker;
 
 class NoteScreen extends StatefulWidget {
   const NoteScreen({super.key});
@@ -19,6 +27,7 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   final noteController = Get.put(NoteController());
+  DateTime _selectedDate = DateTime.parse(DateTime.now().toString());
 
   @override
   void initState() {
@@ -29,111 +38,239 @@ class _NoteScreenState extends State<NoteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: () {
-        Get.toNamed(RouteName.addNoteScreen);
-      }),
-      body: Obx(() {
-        // Observe the changes in notes list
-        final notes = noteController.notes;
+    SizeConfig().init(context);
 
-        if (notes.isEmpty) {
-          // Return the empty notes screen widget
-          return _emptyNotesScreen(context);
-        } else {
-          // Return the list view widget with notes
+    return Scaffold(
+      appBar: _appBar(),
+      body: Column(
+        children: [
+          _addTaskBar(),
+          _dateBar(),
+          SizedBox(
+            height: 12,
+          ),
+          _showTasks(),
+        ],
+      )
+    );
+  }
+
+
+  _showTasks() {
+    return Expanded(
+      child: Obx(() {
+        if (noteController.notes.isEmpty) {
+          return _noTaskMsg();
+        } else
           return ListView.builder(
-            itemCount: notes.length,
-            itemBuilder: (context, index) {
-              final note = notes[index];
-              return SingleNote(
-                noteData: note,
-                onTap: () {
-                  Get.toNamed(RouteName.noteDetails, arguments: note);
-                },
-                onDelete: () async {
-                  print('Attempting to delete note with ID: ${note.id}');
-                  final isDeleted = await noteController.deleteNote(note.id);
-                  if (isDeleted) {
-                    print("Success");
-                  } else {
-                    print("Delete with Problem");
-                  }
-                },
-              );
-            },
-          );
-        }
+              scrollDirection: Axis.vertical,
+              itemCount: noteController.notes.length,
+              itemBuilder: (context, index) {
+                NoteData task = noteController.notes[index];
+                if(task.repeat == 'Daily'){
+                  return AnimationConfiguration.staggeredList(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      horizontalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /*GestureDetector(
+                                onTap: () {
+                                 // showBottomSheet(context, task);
+                                },
+                                child: ),*/
+                            TaskTile(task: task, onRemainderSet: () async{
+                              bool  isRemainderUpdate = await noteController.updateNoteRemainderOnDataBase(task.id, task);
+                            },
+                              onDetailsTap: (){
+                                Get.toNamed(RouteName.addNoteScreen, arguments: task);
+                              },
+
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                if (task.remainderDateTime == DateFormat.yMd().format(_selectedDate)) {
+                  return AnimationConfiguration.staggeredList(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      horizontalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /*GestureDetector(
+                                onTap: () {
+                                //  showBottomSheet(context, task);
+                                },
+                                child: TaskTile(task)),*/
+                            TaskTile(task: task, onRemainderSet: () async{
+                              bool  isRemainderUpdate = await noteController.updateNoteRemainderOnDataBase(task.id, task);
+
+                              if (isRemainderUpdate) {
+                                Utils.successToastMessage("Successfully remainder set");
+                              } else {
+                                Utils.errorToastMessage("Error");
+                              }
+                            },
+                            onDetailsTap: (){
+                              Get.toNamed(RouteName.addNoteScreen, arguments: task);
+                            },
+
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  return Container();
+                }
+              });
       }),
     );
   }
 
-  Widget _emptyNotesScreen(BuildContext context) {
+  _noTaskMsg() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SvgPicture.asset(
+          ImageAssets.task_icon,
+          color: primaryClr.withOpacity(0.5),
+          height: 90,
+          semanticsLabel: 'Task',
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+          child: Text(
+            "You do not have any tasks yet!\nAdd new tasks to make your days productive.",
+            textAlign: TextAlign.center,
+            style: subTitleTextStle,
+          ),
+        ),
+        SizedBox(
+          height: 80,
+        ),
+      ],
+    );
+  }
+
+
+  _dateBar() {
     return Container(
-      color: AppColor.white,
-      width: MediaQuery.sizeOf(context).width,
-      height: MediaQuery.sizeOf(context).height,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            ImageAssets.note_icon,
-            width: Constants.dp_160,
-            height: Constants.dp_160,
+      padding: EdgeInsets.only(bottom: 4),
+      child: DatePicker(
+        DateTime.now(),
+        //height: 100.0,
+        initialSelectedDate: DateTime.now(),
+        selectionColor: context.theme.scaffoldBackgroundColor,
+        selectedTextColor: primaryClr,
+        dateTextStyle: GoogleFonts.lato(
+          textStyle: TextStyle(
+            fontSize: 20.0,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey,
           ),
-          const SizedBox(height: Constants.dp_30),
-          const Text(
-            "Add your first note",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColor.black,
-              fontSize: Constants.dp_20,
-              fontWeight: FontWeight.bold,
-            ),
+        ),
+        dayTextStyle: GoogleFonts.lato(
+          textStyle: TextStyle(
+            fontSize: 10.0,
+            color: Colors.grey,
           ),
-          const SizedBox(height: 12),
-          Text(
-            "Relax and write something \nbeautiful",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColor.gray.withOpacity(0.5), // 50% opacity
-              fontSize: Constants.dp_16,
-              fontWeight: FontWeight.bold,
-            ),
+        ),
+        monthTextStyle: GoogleFonts.lato(
+          textStyle: TextStyle(
+            fontSize: 10.0,
+            color: Colors.grey,
           ),
-          const SizedBox(height: Constants.dp_60),
-          ElevatedButton(
-            onPressed: () {
-              Get.toNamed(RouteName.addNoteScreen)?.then(
-                (value) => {
-                  if (value == "back") {noteController.fetchAllNotes()}
-                },
-              );
+        ),
+        // deactivatedColor: Colors.white,
+
+        onDateChange: (date) {
+          // New date selected
+
+          setState(
+                () {
+              _selectedDate = date;
             },
-            style: ElevatedButton.styleFrom(
-              elevation: 4,
-              shadowColor: AppColor.yellow.withOpacity(1),
-              backgroundColor: AppColor.yellow,
-              disabledBackgroundColor: AppColor.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(Constants.dp_8),
+          );
+        },
+      ),
+    );
+  }
+
+
+  _addTaskBar() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12, top: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                DateFormat.yMMMMd().format(DateTime.now()),
+                style: subHeadingTextStyle,
               ),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(Constants.dp_8),
-              child: Text(
-                "Add Note",
-                style: TextStyle(
-                  fontFamily: AppFonts.schylerRegular,
-                  color: Colors.white,
-                  fontSize: Constants.dp_16,
-                  fontWeight: FontWeight.normal,
-                ),
+              Text(
+                "Today",
+                style: headingTextStyle,
               ),
-            ),
+            ],
+          ),
+          MyButton(
+            label: "+ Add Task",
+            onTap: () async {
+              await Get.toNamed(RouteName.addNoteScreen);
+              noteController.fetchAllNotes();
+            },
           ),
         ],
       ),
     );
   }
+
+  _appBar() {
+    return AppBar(
+        elevation: 0,
+        backgroundColor: context.theme.scaffoldBackgroundColor,
+        leading: GestureDetector(
+          onTap: () {
+            ThemeService().switchTheme();
+            /*_taskController.notifyHelper.displayNotification(
+              title: "Theme Changed",
+              body: Get.isDarkMode
+                  ? "Light theme activated."
+                  : "Dark theme activated",
+            );*/
+
+            //  _taskController.notifyHelper.scheduledNotification();
+            // notifyHelper.periodicalyNotification();
+          },
+          child: Icon(Get.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              color: Get.isDarkMode ? Colors.white : darkGreyClr),
+        ),
+        actions: [
+          CircleAvatar(
+            radius: 16,
+            backgroundImage: AssetImage(ImageAssets.girl_icon),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+        ]);
+  }
+
+
 }

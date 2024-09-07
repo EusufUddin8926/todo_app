@@ -48,17 +48,6 @@ class AddNoteController extends GetxController {
   }
 
 
-  /*Future<bool> updateNoteOnIsarDataBase(Id noteId, NoteData note) async{
-    final success = await appDatabaseManager.updateNoteById(noteId,note);
-    if (success) {
-      return true;
-    } else {
-      return false;
-    }
-
-  }*/
-
-
 
   Future<void> pickImageFromGallery() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);

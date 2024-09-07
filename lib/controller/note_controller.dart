@@ -72,5 +72,16 @@ Future<bool> updateNoteRemainderOnDataBase(Id noteId, NoteData task) async{
 
   }
 
+  Future<bool> updateNoteCompletedOnDataBase(Id noteId) async{
+
+    final success = await _databaseManager.updateNoteCompletedById(noteId, true);
+    if (success) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
 
 }
